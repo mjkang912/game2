@@ -22,10 +22,32 @@ class BadukGame {
     }
     
     setupEventListeners() {
+        // 클릭과 터치 이벤트 모두 처리 (아이패드 지원)
         this.canvas.addEventListener('click', (e) => this.handleClick(e));
+        this.canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            this.handleTouch(e);
+        });
+        this.canvas.addEventListener('touchend', (e) => e.preventDefault());
+        this.canvas.addEventListener('touchmove', (e) => e.preventDefault());
+        
         document.getElementById('pass-btn').addEventListener('click', () => this.pass());
+        document.getElementById('pass-btn').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            this.pass();
+        });
+        
         document.getElementById('resign-btn').addEventListener('click', () => this.resign());
+        document.getElementById('resign-btn').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            this.resign();
+        });
+        
         document.getElementById('new-game-btn').addEventListener('click', () => this.newGame());
+        document.getElementById('new-game-btn').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            this.newGame();
+        });
     }
     
     drawBoard() {
@@ -113,6 +135,22 @@ class BadukGame {
         const rect = this.canvas.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
+        
+        const boardX = Math.round((x - this.boardOffset) / this.cellSize);
+        const boardY = Math.round((y - this.boardOffset) / this.cellSize);
+        
+        if (boardX >= 0 && boardX < 19 && boardY >= 0 && boardY < 19) {
+            this.makeMove(boardX, boardY);
+        }
+    }
+    
+    handleTouch(e) {
+        if (this.gameEnded) return;
+        
+        const rect = this.canvas.getBoundingClientRect();
+        const touch = e.touches[0];
+        const x = touch.clientX - rect.left;
+        const y = touch.clientY - rect.top;
         
         const boardX = Math.round((x - this.boardOffset) / this.cellSize);
         const boardY = Math.round((y - this.boardOffset) / this.cellSize);
