@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>온라인 바둑</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>온라인 바둑</h1>
+            <div class="game-info">
+                <div id="current-player" class="current-player">흑돌 차례</div>
+                <div class="buttons">
+                    <button id="pass-btn" class="btn">패스</button>
+                    <button id="resign-btn" class="btn resign">기권</button>
+                </div>
+            </div>
+        </header>
+        
+        <main>
+            <div class="board-container">
+                <canvas id="board" width="600" height="600"></canvas>
+            </div>
+            
+            <div class="game-status">
+                <div class="captures">
+                    <div class="capture-info">
+                        <span class="black-stone"></span>
+                        <span>흑돌 잡은 수: <span id="black-captures">0</span></span>
+                    </div>
+                    <div class="capture-info">
+                        <span class="white-stone"></span>
+                        <span>백돌 잡은 수: <span id="white-captures">0</span></span>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <div id="game-result" class="game-result hidden">
+            <div class="result-content">
+                <h2 id="result-title">게임 종료</h2>
+                <div id="result-details"></div>
+                <button id="new-game-btn" class="btn">새 게임</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
