@@ -3,50 +3,219 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>온라인 바둑</title>
-    <link rel="stylesheet" href="style.css">
+    <title>바이브 코딩 투표</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 50px 20px;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 60px;
+            text-align: center;
+        }
+
+        .voting-container {
+            display: flex;
+            gap: 80px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .vote-box {
+            width: 250px;
+            height: 200px;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: 3px solid;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .vote-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .blue-box {
+            background-color: #4a90e2;
+            border-color: #357abd;
+            color: white;
+        }
+
+        .blue-box:hover {
+            background-color: #357abd;
+        }
+
+        .red-box {
+            background-color: #e74c3c;
+            border-color: #c0392b;
+            color: white;
+        }
+
+        .red-box:hover {
+            background-color: #c0392b;
+        }
+
+        .vote-text {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .vote-count {
+            font-size: 1.8rem;
+            font-weight: bold;
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .total-votes {
+            margin-top: 40px;
+            font-size: 1.2rem;
+            color: #666;
+            text-align: center;
+        }
+
+        .click-animation {
+            animation: clickEffect 0.3s ease;
+        }
+
+        @keyframes clickEffect {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.95); }
+            100% { transform: scale(1); }
+        }
+
+        @media (max-width: 768px) {
+            .voting-container {
+                flex-direction: column;
+                gap: 40px;
+            }
+            
+            .title {
+                font-size: 2rem;
+            }
+            
+            .vote-box {
+                width: 200px;
+                height: 160px;
+            }
+            
+            .vote-text {
+                font-size: 1.2rem;
+            }
+            
+            .vote-count {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>온라인 바둑</h1>
-            <div class="game-info">
-                <div id="current-player" class="current-player">흑돌 차례</div>
-                <div class="buttons">
-                    <button id="pass-btn" class="btn">패스</button>
-                    <button id="resign-btn" class="btn resign">기권</button>
-                </div>
-            </div>
-        </header>
+    <h1 class="title">바이브 코딩은 필수인가?</h1>
+    
+    <div class="voting-container">
+        <div class="vote-box blue-box" onclick="vote('essential')">
+            <div class="vote-text">필수이다</div>
+            <div class="vote-count" id="essential-count">43표</div>
+        </div>
         
-        <main>
-            <div class="board-container">
-                <canvas id="board" width="600" height="600"></canvas>
-            </div>
-            
-            <div class="game-status">
-                <div class="captures">
-                    <div class="capture-info">
-                        <span class="black-stone"></span>
-                        <span>흑돌 잡은 수: <span id="black-captures">0</span></span>
-                    </div>
-                    <div class="capture-info">
-                        <span class="white-stone"></span>
-                        <span>백돌 잡은 수: <span id="white-captures">0</span></span>
-                    </div>
-                </div>
-            </div>
-        </main>
-        
-        <div id="game-result" class="game-result hidden">
-            <div class="result-content">
-                <h2 id="result-title">게임 종료</h2>
-                <div id="result-details"></div>
-                <button id="new-game-btn" class="btn">새 게임</button>
-            </div>
+        <div class="vote-box red-box" onclick="vote('not-essential')">
+            <div class="vote-text">필수가 아니다</div>
+            <div class="vote-count" id="not-essential-count">30표</div>
         </div>
     </div>
     
-    <script src="script.js"></script>
+    <div class="total-votes">
+        총 투표수: <span id="total-votes">73표</span>
+    </div>
+
+    <script>
+        // 투표 데이터 저장 (실제 서비스에서는 서버/데이터베이스 사용)
+        let votes = {
+            essential: parseInt(localStorage.getItem('essential-votes')) || 43,
+            notEssential: parseInt(localStorage.getItem('not-essential-votes')) || 30
+        };
+
+        // 페이지 로드시 투표 결과 업데이트
+        updateVoteDisplay();
+
+        function vote(type) {
+            // 클릭 애니메이션 효과
+            const clickedBox = event.target.closest('.vote-box');
+            clickedBox.classList.add('click-animation');
+            setTimeout(() => clickedBox.classList.remove('click-animation'), 300);
+
+            // 투표 수 증가
+            if (type === 'essential') {
+                votes.essential++;
+                localStorage.setItem('essential-votes', votes.essential);
+            } else {
+                votes.notEssential++;
+                localStorage.setItem('not-essential-votes', votes.notEssential);
+            }
+
+            // 화면 업데이트
+            updateVoteDisplay();
+
+            // 투표 완료 피드백
+            showVoteConfirmation();
+        }
+
+        function updateVoteDisplay() {
+            document.getElementById('essential-count').textContent = votes.essential + '표';
+            document.getElementById('not-essential-count').textContent = votes.notEssential + '표';
+            document.getElementById('total-votes').textContent = (votes.essential + votes.notEssential) + '표';
+        }
+
+        function showVoteConfirmation() {
+            // 간단한 투표 완료 알림
+            const originalTitle = document.querySelector('.title').textContent;
+            document.querySelector('.title').textContent = '투표해 주셔서 감사합니다! 🎉';
+            document.querySelector('.title').style.color = '#27ae60';
+            
+            setTimeout(() => {
+                document.querySelector('.title').textContent = originalTitle;
+                document.querySelector('.title').style.color = '#333';
+            }, 2000);
+        }
+
+        // 투표 결과 초기화 (개발용)
+        function resetVotes() {
+            if (confirm('투표 결과를 초기화하시겠습니까?')) {
+                votes = { essential: 43, notEssential: 30 };
+                localStorage.setItem('essential-votes', votes.essential);
+                localStorage.setItem('not-essential-votes', votes.notEssential);
+                updateVoteDisplay();
+            }
+        }
+
+        // 더블클릭으로 초기화 (숨겨진 기능)
+        document.querySelector('.title').addEventListener('dblclick', resetVotes);
+    </script>
 </body>
 </html>
