@@ -1,184 +1,158 @@
-+<!DOCTYPE html>
-+<html lang="ko">
-+<head>
-+    <meta charset="UTF-8">
-+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-+    <title>바이브 코딩 투표</title>
-+    <style>
-+        * {
-+            margin: 0;
-+            padding: 0;
-+            box-sizing: border-box;
-+        }
-+
-+        body {
-+            font-family: 'Arial', sans-serif;
-+            background-color: #f5f5f5;
-+            min-height: 100vh;
-+            display: flex;
-+            flex-direction: column;
-+            align-items: center;
-+            padding: 50px 20px;
-+        }
-+
-+        .title {
-+            font-size: 2.5rem;
-+            font-weight: bold;
-+            color: #333;
-+            margin-bottom: 60px;
-+            text-align: center;
-+        }
-+
-+        .voting-container {
-+            display: flex;
-+            gap: 80px;
-+            justify-content: center;
-+            align-items: center;
-+            flex-wrap: wrap;
-+        }
-+
-+        .vote-box {
-+            width: 250px;
-+            height: 200px;
-+            border-radius: 15px;
-+            display: flex;
-+            flex-direction: column;
-+            justify-content: center;
-+            align-items: center;
-+            cursor: pointer;
-+            transition: all 0.3s ease;
-+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-+            border: 3px solid;
-+            position: relative;
-+            overflow: hidden;
-+        }
-+
-+        .vote-box:hover:not(.disabled) {
-+            transform: translateY(-5px);
-+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-+        }
-+
-+        .blue-box {
-+            background-color: #4a90e2;
-+            border-color: #357abd;
-+            color: white;
-+        }
-+
-+        .blue-box:hover:not(.disabled) {
-+            background-color: #357abd;
-+        }
-+
-+        .red-box {
-+            background-color: #e74c3c;
-+            border-color: #c0392b;
-+            color: white;
-+        }
-+
-+        .red-box:hover:not(.disabled) {
-+            background-color: #c0392b;
-+        }
-+
-+        .vote-box.disabled {
-+            opacity: 0.6;
-+            cursor: not-allowed;
-+            filter: grayscale(30%);
-+        }
-+
-+        .vote-box.selected {
-+            border-width: 5px;
-+            transform: scale(1.05);
-+        }
-+
-+        .vote-status {
-+            margin-top: 20px;
-+            font-size: 1.1rem;
-+            color: #666;
-+            text-align: center;
-+            padding: 10px 20px;
-+            background-color: rgba(255, 255, 255, 0.8);
-+            border-radius: 20px;
-+            display: none;
-+        }
-+
-+        .vote-status.show {
-+            display: block;
-+        }
-+
-+        .vote-text {
-+            font-size: 1.5rem;
-+            font-weight: bold;
-+            margin-bottom: 15px;
-+        }
-+
-+        .vote-count {
-+            font-size: 1.8rem;
-+            font-weight: bold;
-+            background-color: rgba(255, 255, 255, 0.2);
-+            padding: 8px 15px;
-+            border-radius: 20px;
-+            backdrop-filter: blur(10px);
-+        }
-+
-+        .total-votes {
-+            margin-top: 40px;
-+            font-size: 1.2rem;
-+            color: #666;
-+            text-align: center;
-+        }
-+
-+        .click-animation {
-+            animation: clickEffect 0.3s ease;
-+        }
-+
-+        @keyframes clickEffect {
-+            0% { transform: scale(1); }
-+            50% { transform: scale(0.95); }
-+            100% { transform: scale(1); }
-+        }
-+
-+        @media (max-width: 768px) {
-+            .voting-container {
-+                flex-direction: column;
-+                gap: 40px;
-+            }
-+            
-+            .title {
-+                font-size: 2rem;
-+            }
-+            
-+            .vote-box {
-+                width: 200px;
-+                height: 160px;
-+            }
-+            
-+            .vote-text {
-+                font-size: 1.2rem;
-+            }
-+            
-+            .vote-count {
-+                font-size: 1.5rem;
-+            }
-+        }
-+    </style>
-+</head>
-+<body>
-+    <h1 class="title">바이브 코딩은 필수인가?</h1>
-+    
-+    <div class="voting-container">
-+        <div class="vote-box blue-box" onclick="vote('essential')">
-+            <div class="vote-text">필수이다</div>
-+            <div class="vote-count" id="essential-count">0표</div>
-+        </div>
-+        
-+        <div class="vote-box red-box" onclick="vote('not-essential')">
-+            <div class="vote-text">필수가 아니다</div>
-+            <div class="vote-count" id="not-essential-count">0표</div>
-+        </div>
-+    </div>
-+    
-+    <div class="total-votes">
-+        총 투표수: <span id="total-votes">0표</span>
-+    </div>
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>바이브 코딩 투표</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 50px 20px;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 60px;
+            text-align: center;
+        }
+
+        .voting-container {
+            display: flex;
+            gap: 80px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .vote-box {
+            width: 250px;
+            height: 200px;
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: 3px solid;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .vote-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .blue-box {
+            background-color: #4a90e2;
+            border-color: #357abd;
+            color: white;
+        }
+
+        .blue-box:hover {
+            background-color: #357abd;
+        }
+
+        .red-box {
+            background-color: #e74c3c;
+            border-color: #c0392b;
+            color: white;
+        }
+
+        .red-box:hover {
+            background-color: #c0392b;
+        }
+
+        .vote-text {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .vote-count {
+            font-size: 1.8rem;
+            font-weight: bold;
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 8px 15px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .total-votes {
+            margin-top: 40px;
+            font-size: 1.2rem;
+            color: #666;
+            text-align: center;
+        }
+
+        .click-animation {
+            animation: clickEffect 0.3s ease;
+        }
+
+        @keyframes clickEffect {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.95); }
+            100% { transform: scale(1); }
+        }
+
+        @media (max-width: 768px) {
+            .voting-container {
+                flex-direction: column;
+                gap: 40px;
+            }
+            
+            .title {
+                font-size: 2rem;
+            }
+            
+            .vote-box {
+                width: 200px;
+                height: 160px;
+            }
+            
+            .vote-text {
+                font-size: 1.2rem;
+            }
+            
+            .vote-count {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1 class="title">바이브 코딩은 필수인가?</h1>
+    
+    <div class="voting-container">
+        <div class="vote-box blue-box" onclick="vote('essential')">
+            <div class="vote-text">필수이다</div>
+            <div class="vote-count" id="essential-count">0표</div>
+        </div>
+        
+        <div class="vote-box red-box" onclick="vote('not-essential')">
+            <div class="vote-text">필수가 아니다</div>
+            <div class="vote-count" id="not-essential-count">0표</div>
+        </div>
+    </div>
+    
+    <div class="total-votes">
+        총 투표수: <span id="total-votes">0표</span>
+    </div>
 +    
 +    <div class="vote-status" id="vote-status">
 +        이미 투표하셨습니다. 한 번만 투표가 가능합니다.
