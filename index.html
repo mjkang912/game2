@@ -53,7 +53,7 @@
             overflow: hidden;
         }
 
-        .vote-box:hover {
+        .vote-box:hover:not(.disabled) {
             transform: translateY(-5px);
             box-shadow: 0 8px 25px rgba(0,0,0,0.15);
         }
@@ -64,7 +64,7 @@
             color: white;
         }
 
-        .blue-box:hover {
+        .blue-box:hover:not(.disabled) {
             background-color: #357abd;
         }
 
@@ -74,8 +74,34 @@
             color: white;
         }
 
-        .red-box:hover {
+        .red-box:hover:not(.disabled) {
             background-color: #c0392b;
+        }
+
+        .vote-box.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            filter: grayscale(30%);
+        }
+
+        .vote-box.selected {
+            border-width: 5px;
+            transform: scale(1.05);
+        }
+
+        .vote-status {
+            margin-top: 20px;
+            font-size: 1.1rem;
+            color: #666;
+            text-align: center;
+            padding: 10px 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 20px;
+            display: none;
+        }
+
+        .vote-status.show {
+            display: block;
         }
 
         .vote-text {
@@ -153,6 +179,10 @@
     <div class="total-votes">
         총 투표수: <span id="total-votes">73표</span>
     </div>
+    
+    <div class="vote-status" id="vote-status">
+        이미 투표하셨습니다. 한 번만 투표가 가능합니다.
+    </div>
 
     <script>
         // 투표 데이터 저장 (실제 서비스에서는 서버/데이터베이스 사용)
@@ -161,10 +191,29 @@
             notEssential: parseInt(localStorage.getItem('not-essential-votes')) || 30
         };
 
+        // 투표 여부 확인
+        let hasVoted = localStorage.getItem('has-voted') === 'true';
+        let userVote = localStorage.getItem('user-vote');
+
         // 페이지 로드시 투표 결과 업데이트
         updateVoteDisplay();
+        
+        // 이미 투표했다면 UI 업데이트
+        if (hasVoted) {
+            disableVoting();
+            showVoteStatus();
+            if (userVote) {
+                highlightSelectedVote(userVote);
+            }
+        }
 
         function vote(type) {
+            // 이미 투표했다면 투표 불가
+            if (hasVoted) {
+                showVoteStatus();
+                return;
+            }
+
             // 클릭 애니메이션 효과
             const clickedBox = event.target.closest('.vote-box');
             clickedBox.classList.add('click-animation');
@@ -179,8 +228,15 @@
                 localStorage.setItem('not-essential-votes', votes.notEssential);
             }
 
+            // 투표 완료 상태 저장
+            hasVoted = true;
+            localStorage.setItem('has-voted', 'true');
+            localStorage.setItem('user-vote', type);
+
             // 화면 업데이트
             updateVoteDisplay();
+            disableVoting();
+            highlightSelectedVote(type);
 
             // 투표 완료 피드백
             showVoteConfirmation();
@@ -192,6 +248,32 @@
             document.getElementById('total-votes').textContent = (votes.essential + votes.notEssential) + '표';
         }
 
+        function disableVoting() {
+            // 모든 투표 박스 비활성화
+            document.querySelectorAll('.vote-box').forEach(box => {
+                box.classList.add('disabled');
+            });
+        }
+
+        function highlightSelectedVote(voteType) {
+            // 선택한 투표 박스 강조
+            const selectedBox = voteType === 'essential' 
+                ? document.querySelector('.blue-box')
+                : document.querySelector('.red-box');
+            selectedBox.classList.add('selected');
+        }
+
+        function showVoteStatus() {
+            // 투표 상태 메시지 표시
+            const statusElement = document.getElementById('vote-status');
+            statusElement.classList.add('show');
+            
+            // 3초 후 메시지 숨김
+            setTimeout(() => {
+                statusElement.classList.remove('show');
+            }, 3000);
+        }
+
         function showVoteConfirmation() {
             // 간단한 투표 완료 알림
             const originalTitle = document.querySelector('.title').textContent;
@@ -201,16 +283,28 @@
             setTimeout(() => {
                 document.querySelector('.title').textContent = originalTitle;
                 document.querySelector('.title').style.color = '#333';
+                showVoteStatus();
             }, 2000);
         }
 
         // 투표 결과 초기화 (개발용)
         function resetVotes() {
-            if (confirm('투표 결과를 초기화하시겠습니까?')) {
+            if (confirm('투표 결과를 초기화하시겠습니까? (투표 상태도 함께 초기화됩니다)')) {
                 votes = { essential: 43, notEssential: 30 };
+                hasVoted = false;
+                
+                // 로컬 스토리지 초기화
                 localStorage.setItem('essential-votes', votes.essential);
                 localStorage.setItem('not-essential-votes', votes.notEssential);
+                localStorage.removeItem('has-voted');
+                localStorage.removeItem('user-vote');
+                
+                // UI 초기화
                 updateVoteDisplay();
+                document.querySelectorAll('.vote-box').forEach(box => {
+                    box.classList.remove('disabled', 'selected');
+                });
+                document.getElementById('vote-status').classList.remove('show');
             }
         }
 
